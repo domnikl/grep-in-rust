@@ -11,17 +11,25 @@ struct Cli {
     path: std::path::PathBuf,
 }
 
-fn main() {
+fn main() -> Result<()> {
     let args = Cli::parse();
-    let lines = read_lines(&args.path).expect("Could not read file");
+    let lines = match read_lines(&args.path) {
+        Ok(lines) => { lines },
+        Err(error) => { return Err(error.into()) }
+    };
 
     for line in lines {
-        let l = line.expect("Could not read line");
+        let l = match line {
+            Ok(line) => { line },
+            Err(error) => { return Err(error.into()); }
+        };
 
         if l.contains(&args.pattern) {
             println!("{}", l)
         }
     }
+
+    Ok(())
 }
 
 fn read_lines<P>(filename: P) -> Result<io::Lines<BufReader<File>>>
